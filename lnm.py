@@ -55,7 +55,6 @@ class LNM:
         response = requests.request("POST", url, json=payload, headers=headers)
 
         data = response.json()
-        print(data)
         self.update_pid(data["position"]["pid"])
         print("opened short position @{} USD with {} sats margin".format(data["position"]["price"],data["position"]["margin"]))
         return data
@@ -73,8 +72,22 @@ class LNM:
         print("closed position with a p&l of {} sats".format(data["pl"]))
         return response.json()
 
-    def fund(self,amount):
-        pass
+    def request_deposit_invoice(self,amount):
+        url = "https://api.lnmarkets.com/v1/user/deposit"
+        #min payment size of 1000 sats
+        payload = {
+            "amount": max(1000,amount),
+            "unit": "sat"
+        }
+        headers = {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            "Authorization": "Bearer "+self.LNMToken
+        }
+
+        response = requests.request("POST", url, json=payload, headers=headers)
+        return response.json()["paymentRequest"]
+
     def withdraw(self,invoice):
         pass
 

@@ -2,6 +2,8 @@ import math
 import time
 import csv
 import json
+from lnm import LNM
+from lnbits_wallet import LNBits
 
 class Hedger:
     balance = 18932
@@ -19,6 +21,25 @@ class Hedger:
             self.balance = data["balance"]
             self.coverage_range = data["coverage_range"]
             self.exchange = LNM(data["LNMToken"])
+            self.lightning_wallet = LNBits(data["lnbits_admin_key"])
+
+    def update(self):
+        total_balance = self.get_total_balance()
+        price = self.exchange.get_current_price()
+        margin_used = self.exchange.get_margin_used()
+
+        self.save_stats(price,total_balance,margin_used)
+
+        print("running with {:.2f}% short hedge".format(self.exchange.get_position_coverage(self.get_current_balance())*100))
+        print("current total balance of {} sats with value of: {:.2f} USD with Bitcoin price @{} USD".format(total_balance,self.get_balance_usd_value(),self.exchange.get_current_price()))
+
+        if self.exchange.are_positions_running() == True:
+            if self.exchange.is_position_coverage_within_range(self.coverage_range,self.get_current_balance()) == False:
+                print("short running but not within the coverage range!")
+                self.exchange.close_position()
+                self.open_short(int(self.get_current_balance()/self.exchange.default_leverage))
+        else:
+            short_data = self.open_short(int(self.get_current_balance()/self.exchange.default_leverage))
 
     def get_total_balance(self):
         #save total balance for 10 seconds
@@ -37,26 +58,18 @@ class Hedger:
         current_bid_price = self.exchange.get_current_price()
         return (total_balance/(1*10**8)) * current_bid_price
 
-    def update(self):
 
-        total_balance = self.get_total_balance()
-        price = self.exchange.get_current_price()
-        margin_used = self.exchange.get_margin_used()
 
-        self.save_stats(price,total_balance,margin_used)
+    def open_short(self,required_margin):
+        #check if the margin is available
+        missing_funds = required_margin - self.exchange.get_available_margin()
+        print("missing {} sats to open a short position of {} sats".format(missing_funds,required_margin))
+        if missing_funds > 0:
+            invoice = self.exchange.request_deposit_invoice(missing_funds)
+            self.lightning_wallet.pay(invoice)
+            print("deposited {} sats on lnmarkets.com".format(missing_funds))
+        self.exchange.open_short(required_margin)
 
-        print("running with {:.2f}% coverage".format(self.exchange.get_position_coverage(self.get_current_balance())*100))
-        print("current total balance of {} sats with value of: {:.2f} USD with Bitcoin price @{} USD".format(total_balance,self.get_balance_usd_value(),self.exchange.get_current_price()))
-        if self.exchange.are_positions_running() == True:
-            if self.exchange.is_position_coverage_within_range(self.coverage_range,self.get_current_balance()) == False:
-                print("short running but not within the coverage range!")
-                self.exchange.close_position()
-                self.exchange.open_short(int(self.get_current_balance()/self.exchange.default_leverage))
-        else:
-            print("no shorts running!")
-            short_data = self.exchange.open_short(int(self.get_current_balance()/self.exchange.default_leverage))
-
-    """
     def add(self,x):
         self.balance += x
         self.fund_lnm()
@@ -81,7 +94,7 @@ class Hedger:
             print("withdrawing",unnecessary_funds," sats from lnmarkets")
             self.lnm_balance -= unnecessary_funds
         print("balance:",self.balance," lnm:",self.lnm_balance)
-    """
+
 
 if __name__ == "__main__":
     h = Hedger()
