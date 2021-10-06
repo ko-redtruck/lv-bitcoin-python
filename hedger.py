@@ -71,7 +71,7 @@ class Hedger:
         print("current total balance of {} sats with value of: {:.2f} USD with Bitcoin price @{} USD".format(total_balance,self.get_balance_usd_value(),self.exchange.get_current_price()))
 
         if self.exchange.is_positon_running() == True:
-            if self.__get_required_margin() == False:
+            if self.is_position_within_coverage_range() == False:
                 print("short running but not within the coverage range!")
                 self.exchange.close_position()
                 self.open_short(self.__get_required_margin())
@@ -116,7 +116,7 @@ class Hedger:
     def __get_position_coverage(self):
         return (self.exchange.default_leverage * self.exchange.get_used_margin())/(self.lightning_wallet.get_balance()+self.exchange.get_available_margin()+self.exchange.get_used_margin())
 
-    def __get_required_margin(self):
+    def is_position_within_coverage_range(self):
         return abs(self.__get_position_coverage() - self.coverage_target) <= self.coverage_range
 
     def __get_required_margin(self):
