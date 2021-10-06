@@ -11,34 +11,54 @@ class LNM:
             "Accept": "application/json",
             "Authorization": "Bearer "+self.LNMToken+""
         }
+        self.pid = self.__get_pid()
 
-    def delete_running_pid(self):
-        self.update_pid("")
+    def __delete_running_pid(self):
+        self.__update_pid("")
 
-    def update_pid(self,pid):
+    def __update_pid(self,pid):
         with open('lnm.json', 'w') as outfile:
+            self.pid = pid
             json.dump({"running_pid":pid}, outfile)
 
-    def get_running_pid(self):
+    def __get_pid(self):
         with open('lnm.json') as json_file:
             data = json.load(json_file)
             return data["running_pid"]
 
-    def get_current_pl(self):
-        running_positions = self.get_running_positions()
-        if len(running_positions) == 0:
+    def __get_position(self):
+        url = "https://api.lnmarkets.com/v1/futures"
+        querystring = {"type":"running"}
+        response = requests.request("GET", url, headers=self.headers, params=querystring)
+        positions = response.json()
+
+        if len(positions)==0:
+            return None
+
+        for p in positions:
+            if p["pid"] == self.pid:
+                return p
+
+        return None
+
+    def get_pl(self) -> int:
+        try:
+            return self.__get_position()["pl"]
+        except:
             return 0
-        else:
-            return running_positions[0]["pl"]
 
-    def get_running_position_total_margin(self):
-        running_positions = self.get_running_positions()
-        margin = 0
-        for position in running_positions:
-            margin += position["margin"] + position["pl"]
-        return margin
+    def get_available_margin(self) -> int:
+        url = "https://api.lnmarkets.com/v1/user"
+        response = requests.request("GET", url, headers=self.headers)
+        return response.json()["balance"]
 
-    def open_short(self,margin):
+    def get_used_margin(self) -> int:
+        try:
+            return self.__get_position()["margin"]
+        except:
+            return 0
+
+    def open_short(self,margin) -> dict:
         url = "https://api.lnmarkets.com/v1/futures"
         payload = {
             "type": "m",
@@ -55,18 +75,18 @@ class LNM:
         response = requests.request("POST", url, json=payload, headers=headers)
 
         data = response.json()
-        self.update_pid(data["position"]["pid"])
+        self.__update_pid(data["position"]["pid"])
         print("opened short position @{} USD with {} sats margin".format(data["position"]["price"],data["position"]["margin"]))
         return data
 
-    def close_position(self,pid=""):
-        url = "https://api.lnmarkets.com/v1/futures"
-        if pid == "":
-            pid = self.get_running_pid()
+    def close_position(self,pid=None):
+        if pid is None:
+            pid = self.pid
 
+        url = "https://api.lnmarkets.com/v1/futures"
         querystring = {"pid":pid}
         response = requests.request("DELETE", url, headers=self.headers, params=querystring)
-        self.delete_running_pid()
+        self.__delete_running_pid()
         data = response.json()
         print(data)
         print("closed position with a p&l of {} sats".format(data["pl"]))
@@ -91,40 +111,9 @@ class LNM:
     def withdraw(self,invoice):
         pass
 
-    def get_running_positions(self):
-        url = "https://api.lnmarkets.com/v1/futures"
-        querystring = {"type":"running"}
-        response = requests.request("GET", url, headers=self.headers, params=querystring)
-        return response.json()
+    def is_positon_running(self):
+        return self.__get_position() is not None
 
-    def are_positions_running(self):
-        if len(self.get_running_positions()) == 0:
-            return False
-        else:
-            return True
-
-    def get_available_margin(self):
-        url = "https://api.lnmarkets.com/v1/user"
-        response = requests.request("GET", url, headers=self.headers)
-        return response.json()["balance"]
-
-    def get_margin_used(self):
-        running_positions = self.get_running_positions()
-        margin = 0
-        for position in running_positions:
-            margin += position["margin"]
-        return margin
-
-    def get_position_coverage(self,balance):
-        return (self.default_leverage* self.get_margin_used())/balance
-
-    def is_position_coverage_within_range(self,range,balance):
-        return abs(self.get_position_coverage(balance) - 1.0) <= range
-
-    def get_optimal_margin(self,balance):
-        return int((int(balance/self.unit_margin) * self.unit_margin))
-    def get_optimal_coverage(self,balance):
-        return self.get_optimal_margin(balance)/balance
     def get_current_price(self):
         url = "https://api.lnmarkets.com/v1/futures/history/bid-offer"
         response = requests.request("GET", url, headers=self.headers)
