@@ -62,6 +62,11 @@ class Hedger:
 
     def update(self):
         total_balance = self.get_balance()
+
+        if total_balance == 0:
+            print("please deposit sats in your wallet")
+            return
+
         price = self.exchange.get_current_price()
         margin_used = self.exchange.get_used_margin()
 
@@ -70,8 +75,17 @@ class Hedger:
         print("running with {:.2f}% short hedge".format(self.__get_position_coverage()*100))
         print("current total balance of {} sats with value of: {:.2f} USD with Bitcoin price @{} USD".format(total_balance,self.get_balance_usd_value(),self.exchange.get_current_price()))
 
+
+        #decuct 10 sats buffer for fees
+        available_margin = self.exchange.get_available_margin() - 10
+        pl = self.exchange.get_pl()
+        if available_margin > self.exchange.min_withdrawable or available_margin + pl > self.exchange.min_withdrawable:
+            if pl > 0:
+                self.exchange.close_position()
+            self.withdraw_from_exchange(max(available_margin,pl+available_margin))
+            
         if self.exchange.is_positon_running() == True:
-            if self.is_position_within_coverage_range() == False:
+            if self.__is_position_within_coverage_range() == False:
                 print("short running but not within the coverage range!")
                 self.exchange.close_position()
                 self.open_short(self.__get_required_margin())
@@ -105,18 +119,16 @@ class Hedger:
 
         self.exchange.open_short(required_margin)
 
-    """
-    def withdraw_lnm(self):
-        unnecessary_funds = self.lnm_balance - self._get_min_total_required_balance()
-        if unnecessary_funds >= 1000:
-            print("withdrawing",unnecessary_funds," sats from lnmarkets")
-            self.lnm_balance -= unnecessary_funds
-        print("balance:",self.lightning_wallet.get_balance()," lnm:",self.lnm_balance)
-    """
+    
+    def withdraw_from_exchange(self,amount):
+        print("withdrawing {} sats from lnmarkets.com".format(amount))
+        invoice = self.lightning_wallet.create_invoice(amount)
+        self.exchange.withdraw(invoice)
+    
     def __get_position_coverage(self):
         return (self.exchange.default_leverage * self.exchange.get_used_margin())/(self.lightning_wallet.get_balance()+self.exchange.get_available_margin()+self.exchange.get_used_margin())
 
-    def is_position_within_coverage_range(self):
+    def __is_position_within_coverage_range(self):
         return abs(self.__get_position_coverage() - self.coverage_target) <= self.coverage_range
 
     def __get_required_margin(self):

@@ -4,6 +4,7 @@ import json
 class LNM:
     default_leverage = 50
     unit_margin = 41.8
+    min_withdrawable = 1000
 
     def __init__(self,LNMToken):
         self.LNMToken = LNMToken
@@ -22,9 +23,12 @@ class LNM:
             json.dump({"running_pid":pid}, outfile)
 
     def __get_pid(self):
-        with open('lnm.json') as json_file:
-            data = json.load(json_file)
-            return data["running_pid"]
+        try:
+            with open('lnm.json') as json_file:
+                data = json.load(json_file)
+                return data["running_pid"]
+        except:
+            return ""
 
     def __get_position(self):
         url = "https://api.lnmarkets.com/v1/futures"
@@ -109,7 +113,15 @@ class LNM:
         return response.json()["paymentRequest"]
 
     def withdraw(self,invoice):
-        pass
+        url = "https://api.lnmarkets.com/v1/user/withdraw"
+        payload = {"invoice": invoice}
+        headers = {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            "Authorization": "Bearer "+self.LNMToken
+        }
+
+        response = requests.request("POST", url, json=payload, headers=headers)
 
     def is_positon_running(self):
         return self.__get_position() is not None
