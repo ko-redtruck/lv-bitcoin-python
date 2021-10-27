@@ -1,13 +1,23 @@
 import requests
 import json
 
-class LNM:
+class Exchange:
     default_leverage = 50
     unit_margin = 41.8
     min_withdrawable = 1000
 
-    def __init__(self,LNMToken):
-        self.LNMToken = LNMToken
+    def __init__(self):
+        config_data = {}
+        try:
+            with open("./internal_data/lnm_config.json") as json_file:
+                config_data = json.load(json_file)
+        except:
+            with open("./internal_data/lnm_config.json","w") as json_file:
+                LNMToken = input("Your lnmarkets.com token with all scopes (Withdraw, Deposit, Futures, User): ")
+                config_data = {"token":LNMToken}
+                json.dump(config_data, json_file)
+
+        self.LNMToken = config_data["token"]
         self.headers = {
             "Accept": "application/json",
             "Authorization": "Bearer "+self.LNMToken+""
@@ -18,13 +28,13 @@ class LNM:
         self.__update_pid("")
 
     def __update_pid(self,pid):
-        with open('lnm.json', 'w') as outfile:
+        with open('./internal_data/lnm.json', 'w') as outfile:
             self.pid = pid
             json.dump({"running_pid":pid}, outfile)
 
     def __get_pid(self):
         try:
-            with open('lnm.json') as json_file:
+            with open('./internal_data/lnm.json') as json_file:
                 data = json.load(json_file)
                 return data["running_pid"]
         except:
@@ -130,3 +140,6 @@ class LNM:
         url = "https://api.lnmarkets.com/v1/futures/history/bid-offer"
         response = requests.request("GET", url, headers=self.headers)
         return response.json()[0]["bid"]
+
+    def get_carry_fees(self) -> float:
+        return 0.001

@@ -1,10 +1,22 @@
 import requests
+import json
 
+class LightningWallet:
+    def __init__(self):
+        config_data = {}
+        try:
+            with open("./internal_data/lnbits_wallet.json") as json_file:
+                config_data = json.load(json_file)
+        except:
+             with open("./internal_data/lnbits_wallet.json") as json_file:
+                config_data = json.load(json_file)
+                lnbits_host = input("Where is your lnbits instance hosted? (like https://lnbits.com)")
+                lnbits_admin_key = input("Your lnbits admin key to access the wallet: ")
+                config_data = {"host": lnbits_host,"admin_key":lnbits_admin_key}
+                json.dump(config_data,json_file)
 
-class LNBits:
-    def __init__(self,admin_key,host):
-        self.admin_key = admin_key
-        self.host = host
+        self.admin_key = config_data["admin_key"]
+        self.host = config_data["host"]
 
     def get_balance(self) -> int:
         headers = {
