@@ -19,6 +19,7 @@
     <link href="https://cdn.jsdelivr.net/npm/halfmoon@1.1.1/css/halfmoon.min.css" rel="stylesheet" />
     Learn more: https://www.gethalfmoon.com/docs/customize/#notes-on-browser-compatibility
   -->
+
 </head>
 <body class="with-custom-webkit-scrollbars with-custom-css-scrollbars" data-dm-shortcut-enabled="true" data-set-preferred-mode-onload="true">
   <!-- Modals go here -->
@@ -32,7 +33,7 @@
     <!-- Content wrapper start -->
     <div class="content-wrapper">
         <!-- Container-fluid -->
-        <div class="container-fluid w-half">
+        <div class="container">
           <!-- First comes a content container -->
           <div class="content">
             <h1 class="content-title font-size-22 font-weight-bold"> <!-- font-size-22 = font-size: 2.2rem (22px) -->
@@ -41,49 +42,68 @@
     
           </div>
           <!-- Next comes a card -->
-         
           <div class="card text-center">
-               <p class=" font-size-16">Lower Bitcoin volatility with Futures hedging by shorting on <a href="http://lnmarkets.com">lnmarkets.com</a> automatically!</p>
-              <a href="https://github.com/ko-redtruck/lv-bitcoin-python" class="hyperlink btn btn-primary btn-lg">Get started on GitHub</a><br>
-              <small>*Alpha version</small>
-          </div>
-          <div class="card">
-            <h2 class="content-title">
-                How it works
-              </h2>
-              <ol start="0">
-                <li>Create an account on one of the supported exchanges.</li>
-                  <li>Decide how long you want to hedge Bitcoin. In this period your balance remains essentially stable to the USD Dollar but every day you pay a small fee to keep your shorts open on the exchange.</li>
-                    <li>Input the amount of Bitcoin you want to hedge. The script calculates the correct amount of margin and leverage to hedge.</li>
-                    <li>You need to fund the script via a Lightning Network payment in the amount of 2% of your Bitcoin balance. This money does directly go to the exchange and not through us.</li>
-                    <li>The script opens a short position on the exchange with the predetermined margin and leverage.</li>
-                  <li>Finally, the script creates a cronjob automatically which ensures that the script runs every 10-15 minutes to open a new short if you get liquidated. This ensures you are hedged for the entirety of your duration.</li>
-                </ol>
-          </div>
-          <div class="card">
-              <h2 class="content-title">Works with</h2>
-                <ul>
-                    <li><a href="http://lnbits.com">LNbits</a> (automatic deposit & withdraw)</li>
-                    <li>All Lightning nodes/wallet (manually)</li>
-                </ul>
-          </div>
-          <div class="card">
-            <h2 class="content-title">Supported exchanges</h2>
-              <ul>
-                  <li><a href="http://lnmarkets.com">lnmarkets.com</a></li>
-              </ul>
-        </div>
-        <div class="card">
-            <h2 class="content-title">Use cases</h2>
-              <ul>
-                  <li>Protect the value of your open channels (non-liquid capital) as a Lightning Network node operator</li>
-                  <li>Protect your savings in uncertain market conditions</li>
-                  <li>Avoid the temporary corrections after a run up as a trader in a bull market</li>
-                  <li>Bet on falling Bitcoin prices by overstating your Bitcoin balance (up to 50x leverage)</li>
-                  <li>Hedge your position and get some incoming liquidity because a small portion (~2-4%) of your balance is on an exchange.</li>
+            <p class=" font-size-16">Lower Bitcoin volatility with Futures hedging by shorting on <a href="http://lnmarkets.com">lnmarkets.com</a> automatically!</p>
+           <a href="https://github.com/ko-redtruck/lv-bitcoin-python" class="hyperlink btn btn-primary btn-lg">Get started on GitHub</a><br>
+           <small>*Alpha version</small>
+       </div>
+                <div class="card">
+                    <h2 class="content-title">
+                        How it works
+                      </h2>
+                      <ol start="0">
+                        <li>Create an account on one of the supported exchanges.</li>
+                          <li>Decide how long you want to hedge Bitcoin. In this period your balance remains essentially stable to the USD Dollar but every day you pay a small fee to keep your shorts open on the exchange.</li>
+                            <li>Input the amount of Bitcoin you want to hedge. The script calculates the correct amount of margin and leverage to hedge.</li>
+                            <li>You need to fund the script via a Lightning Network payment in the amount of 2% of your Bitcoin balance. This money does directly go to the exchange and not through us.</li>
+                            <li>The script opens a short position on the exchange with the predetermined margin and leverage.</li>
+                          <li>Finally, the script creates a cronjob automatically which ensures that the script runs every 10-15 minutes to open a new short if you get liquidated. This ensures you are hedged for the entirety of your duration.</li>
+                        </ol>
+                  </div>
+                <div class="card">
+                    <h2 class="content-title">Use cases</h2>
+                      <ul>
+                          <li>Protect the value of your open channels (non-liquid capital) as a Lightning Network node operator</li>
+                          <li>Protect your savings in uncertain market conditions</li>
+                          <li>Avoid the temporary corrections after a run up as a trader in a bull market</li>
+                          <li>Bet on falling Bitcoin prices by overstating your Bitcoin balance (up to 50x leverage)</li>
+                          <li>Hedge your position and get some incoming liquidity because a small portion (~2-4%) of your balance is on an exchange.</li>
+        
+                      </ul>
+                </div>
+            
+                <div class="card ">
+                    <h2 class="content-title">Works with</h2>
+                      <ul>
+                          <li><a href="http://lnbits.com">LNbits</a> (automatic deposit & withdraw)</li>
+                          <li>All Lightning nodes/wallet (manually)</li>
+                      </ul>
+                </div>
+                <div class="card ">
+                    <h2 class="content-title">Supported exchanges</h2>
+                      <ul>
+                          <li><a href="http://lnmarkets.com">lnmarkets.com</a></li>
+                      </ul>
+                </div>
+                <div class="card">
+                  <h2 class="content-title">Feedback</h2>
+                    <!-- Beginning of tippin.me Button -->
 
-              </ul>
-        </div>
+
+                   
+                    <form
+                    action="https://formspree.io/f/xbjqvqao"
+                    method="POST">
+                    <div class="form-group">
+
+                      <div class="form-group">
+                        <textarea class="form-control" name="text" id="description" placeholder="What features do you love or what would you like to have? Did you have any issues?"></textarea>
+                      </div>
+                    <!-- your other form fields go here -->
+                    <button class="btn btn-primary" type="submit">Send</button>
+                  
+                  </form>
+        
           <!-- Then another content container -->
           
         </div>
