@@ -20,3 +20,7 @@ Single command setup
 ```shell
 git clone https://github.com/ko-redtruck/lv-bitcoin-python.git && cd ./lv-bitcoin-python && pip3 install python-crontab && python3 hedger.py
 ```
+
+<hr/>
+
+[Support my work](https://tippin.me/@lnanswers)
