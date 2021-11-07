@@ -1,6 +1,6 @@
 # lv-bitcoin-python
-A Python script to lower Bitcoin volatility with Futures (lnmarkets.com)
-
+A Python script to lower Bitcoin volatility with Futures (lnmarkets.com) 
+You can find more information on our [website](https://ko-redtruck.github.io/lv-bitcoin-python/).
 ### Setup instructions for Linux
 1. Clone the repository
 ```shell
